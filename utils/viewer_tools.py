@@ -1,4 +1,5 @@
 import os
+import re
 import traceback
 import requests
 import zipfile
@@ -161,7 +162,8 @@ def enketo_url(form_url, id_string, instance_xml=None,
         return False
 
     url = urljoin(settings.ENKETO_URL, settings.ENKETO_API_SURVEY_PATH)
-
+    # enforce https protocol, otherwise data submission from enketo.org to our server fails
+    form_url = re.sub("^http:", "https:", form_url)
     values = {
         'form_id': id_string,
         'server_url': form_url
