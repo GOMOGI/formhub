@@ -395,3 +395,12 @@ MONGO_DB = MONGO_CONNECTION[MONGO_DATABASE['NAME']]
 # this is rather pointless, currently, given the state of the tests
 # however, some functions require its being defined
 TESTING_MODE = False
+
+
+try:
+    from local_settings import *
+except ImportError as e:
+    import logging
+    import traceback
+    logging.warning('Could not import local_settings. Moving on... \n {e}'.format(e=e))
+
