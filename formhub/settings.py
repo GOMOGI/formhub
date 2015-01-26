@@ -401,6 +401,5 @@ try:
     from local_settings import *
 except ImportError as e:
     import logging
-    import traceback
     logging.warning('Could not import local_settings. Moving on... \n {e}'.format(e=e))
 
