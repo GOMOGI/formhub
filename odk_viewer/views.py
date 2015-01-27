@@ -701,16 +701,16 @@ def attachment_url(request, size='medium'):
     # this assumes duplicates are the same file
     result = Attachment.objects.filter(media_file=media_file)[0:1]
     if result.count() == 0:
-        
+
         if "instance" in request.GET.keys():
             instance = Instance.objects.filter(uuid=request.GET.get('instance'))
             result = Attachment.objects.filter(instance=instance, original_name=media_file.split("/")[-1])[0:1]
             if result.count() == 0:
                 return HttpResponseNotFound(_(u'Attachment not found'))
-    
+
     if result.count() == 0:
         return HttpResponseNotFound(_(u'Attachment not found'))
-    
+
     attachment = result[0]
 
     if not attachment.mimetype.startswith('image'):

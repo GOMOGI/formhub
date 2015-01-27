@@ -1,8 +1,10 @@
 from django.contrib import admin
 from odk_logger.models import XForm
+from guardian.admin import GuardedModelAdmin
 
 
-class FormAdmin(admin.ModelAdmin):
+
+class FormAdmin(GuardedModelAdmin):
 
     list_display = ('id_string', 'user', 'form_active', 'shared')
 
