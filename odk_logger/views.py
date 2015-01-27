@@ -432,16 +432,16 @@ def enter_data(request, username, id_string, test_server=None):
                               id_string=id_string)
     if not has_edit_permission(xform, owner, request, xform.shared):
         return HttpResponseForbidden(_(u'Not shared.'))
-    
+
     if test_server:
         form_url = test_server
     else:
         try:
-            formhub_url = "http://%s/" % request.META['HTTP_HOST']
+            formhub_url = request.build_absolute_uri('/')
         except:
             formhub_url = "http://formhub.org/"
-        form_url = formhub_url + username   
-        
+        form_url = formhub_url + username
+
         if hasattr(settings, "TESTING_MODE") and settings.TESTING_MODE:
             form_url = "https://testserver.com/bob"
     try:
@@ -491,7 +491,7 @@ def edit_data(request, username, id_string, data_id):
     url = '%sdata/edit_url' % settings.ENKETO_URL
     # see commit 220f2dad0e for tmp file creation
     try:
-        formhub_url = "http://%s/" % request.META['HTTP_HOST']
+        formhub_url = request.build_absolute_uri('/')
     except:
         formhub_url = "http://formhub.org/"
     injected_xml = inject_instanceid(instance.xml, instance.uuid)
@@ -503,7 +503,7 @@ def edit_data(request, username, id_string, data_id):
                 'id_string': id_string}
         ) + "#/" + str(instance.id))
     form_url = formhub_url + username
-    
+
     if hasattr(settings, "TESTING_MODE") and settings.TESTING_MODE:
         form_url = "https://testserver.com/bob"
 
