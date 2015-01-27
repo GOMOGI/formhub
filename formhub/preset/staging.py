@@ -15,7 +15,7 @@ TEMPLATE_STRING_IF_INVALID = ''
 TIME_ZONE = 'Africa/Lagos'
 
 # override to set the actual location for the production static and media directories
-MEDIA_ROOT = '/var/forms-media'
+MEDIA_ROOT = '/var/formhub-media'
 STATIC_ROOT = "/srv/formhub-static"
 
 ADMINS = (
@@ -75,9 +75,6 @@ if TESTING_MODE:
 
     ENKETO_API_TOKEN = 'abc'
     #TEST_RUNNER = 'djcelery.contrib.test_runner.CeleryTestSuiteRunner'
-else:
-    MEDIA_ROOT = '/var/forms-media/'
-    #MEDIA_ROOT = os.path.join(PROJECT_ROOT, 'media/')
 
 if PRINT_EXCEPTION and DEBUG:
     MIDDLEWARE_CLASSES += ('utils.middleware.ExceptionLoggingMiddleware',)

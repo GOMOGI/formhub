@@ -695,7 +695,8 @@ def data_view(request, username, id_string):
 
 
 def attachment_url(request, size='medium'):
-    media_file = request.GET.get('media_file').split("?")[0]
+    # the media_file parameter is required, check also for empty string
+    media_file = request.GET.get('media_file','').split("?")[0]
     # TODO: how to make sure we have the right media file,
     # this assumes duplicates are the same file
     result = Attachment.objects.filter(media_file=media_file)[0:1]

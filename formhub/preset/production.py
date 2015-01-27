@@ -13,4 +13,3 @@ import logging
 logging.warning("Hey you shouldn't be using this.\n"
 "If you are, copy this file to local_settings.py in the parent dir\n"
 "See https://code.djangoproject.com/wiki/SplitSettings#Multiplesettingfilesimportingfromeachother")
-
