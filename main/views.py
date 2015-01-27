@@ -23,7 +23,7 @@ from main.forms import UserProfileForm, FormLicenseForm, DataLicenseForm,\
     SourceForm, PermissionForm, RoleForm, MediaForm, MapboxLayerForm, \
     ActivateSMSSupportFom
 from main.models import UserProfile, MetaData
-from odk_logger.models import Instance, XForm
+from odk_logger.models import Instance, XForm, Attachment
 from odk_logger.views import enter_data
 from odk_viewer.models import DataDictionary, ParsedInstance
 from odk_viewer.models.data_dictionary import upload_to
@@ -171,7 +171,7 @@ def profile(request, username):
         def set_form():
             form = QuickConverter(request.POST, request.FILES)
             survey = form.publish(request.user).survey
-            
+
             audit = {}
             audit_log(
                 Actions.FORM_PUBLISHED, request.user, content_user,
@@ -197,9 +197,9 @@ def profile(request, username):
                     'form_url': enketo_webform_url},
                 'form_o': survey
             }
-        
+
         form_result = publish_form(set_form)
-        
+
         if form_result['type'] == 'alert-success':
             # comment the following condition (and else)
             # when we want to enable sms check for all.
@@ -470,7 +470,7 @@ def public_api(request, username, id_string):
 
 @login_required
 def edit(request, username, id_string):
-    
+
     xform = XForm.objects.get(user__username=username, id_string=id_string)
     owner = xform.user
 
@@ -903,20 +903,17 @@ def form_photos(request, username, id_string):
     context.xform = xform
     image_urls = []
 
-    for instance in xform.surveys.all():
-        for attachment in instance.attachments.all():
-            # skip if not image e.g video or file
-            if not attachment.mimetype.startswith('image'):
-                continue
+    for attachment in Attachment.objects.filter(
+            mimetype__startswith='image',
+            instance__xform__id=xform.id):
+        data = {}
 
-            data = {}
+        for i in ['small', 'medium', 'large', 'original']:
+            url = reverse(attachment_url, kwargs={'size': i})
+            url = '%s?media_file=%s' % (url, urlencode(attachment.media_file.name))
+            data[i] = url
 
-            for i in ['small', 'medium', 'large', 'original']:
-                url = reverse(attachment_url, kwargs={'size': i})
-                url = '%s?media_file=%s' % (url, urlencode(attachment.media_file.name))
-                data[i] = url
-
-            image_urls.append(data)
+        image_urls.append(data)
 
     context.images = image_urls
     context.profile, created = UserProfile.objects.get_or_create(user=owner)
