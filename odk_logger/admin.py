@@ -15,4 +15,7 @@ class FormAdmin(GuardedModelAdmin):
             return qs
         return qs.filter(user=request.user)
 
+    list_filter = ('date_modified', 'form_active', 'user',)
+
+
 admin.site.register(XForm, FormAdmin)
