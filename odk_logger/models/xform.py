@@ -126,6 +126,7 @@ class XForm(models.Model):
             else:
                 self.encrypted = False
 
+    # That looks intersting.
     def update(self, *args, **kwargs):
         super(XForm, self).save(*args, **kwargs)
 
@@ -154,10 +155,13 @@ class XForm(models.Model):
                                                                self.id_string)
             except:
                 self.sms_id_string = self.id_string
+        original_pk = self.pk
         super(XForm, self).save(*args, **kwargs)
-        
-        for perm in get_perms_for_model(XForm):
-            assign_perm(perm.codename, self.user, self)
+        if self.pk != original_pk:
+            print "Setting perms for ", self.pk
+            #for perm in get_perms_for_model(XForm):
+            #    assign_perm(perm.codename, self.user, self)
+
 
     def __unicode__(self):
         return getattr(self, "id_string", "")
@@ -219,7 +223,6 @@ def stats_forms_created(sender, instance, created, **kwargs):
         stat_log.delay('formhub-forms-created', 1)
 
 post_save.connect(stats_forms_created, sender=XForm)
-
 
 def update_profile_num_submissions(sender, instance, **kwargs):
     profile_qs = User.profile.get_query_set()

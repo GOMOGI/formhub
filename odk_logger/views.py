@@ -396,6 +396,9 @@ def delete_xform(request, username, id_string):
     xform = get_object_or_404(XForm, user__username=username,
                               id_string=id_string)
 
+    if not request.user.has_perm('odk_logger.delete_xform', xform):
+        return HttpResponseForbidden(_('You do not have permission to delete '
+                                        'this form, please see an your admin.'))
     # delete xform and submissions
     remove_xform(xform)
 
@@ -430,8 +433,10 @@ def enter_data(request, username, id_string, test_server=None):
     owner = get_object_or_404(User, username=username)
     xform = get_object_or_404(XForm, user__username=username,
                               id_string=id_string)
-    if not has_edit_permission(xform, owner, request, xform.shared):
-        return HttpResponseForbidden(_(u'Not shared.'))
+    if not (owner == xform.user or
+            request.user.has_perm('odk_logger.edit_xform', xform)):
+        return HttpResponseForbidden(_('You do not have permission to add to '
+                                        'this form, please see an your admin.'))
 
     if test_server:
         form_url = test_server
@@ -478,6 +483,8 @@ def edit_data(request, username, id_string, data_id):
         XForm, user__username=username, id_string=id_string)
     instance = get_object_or_404(
         Instance, pk=data_id, xform=xform)
+    import pprint
+    pprint.pprint(locals())
     if not has_edit_permission(xform, owner, request, xform.shared):
         return HttpResponseForbidden(_(u'Not shared.'))
     if not hasattr(settings, 'ENKETO_URL'):

@@ -480,7 +480,7 @@ def edit(request, username, id_string):
 
         # ensure is crowdform
         if xform.is_crowd_form:
-            if crowdform_action == 'delete':
+            if crowdform_action == 'delete' and request.user.has_perm('odk_logger.delete_xform', xform):
                 MetaData.objects.get(
                     xform__id_string=id_string,
                     data_value=request_username,
@@ -493,8 +493,7 @@ def edit(request, username, id_string):
                 'username': request_username
             }))
 
-    if username == request.user.username or\
-            request.user.has_perm('odk_logger.change_xform', xform):
+    if request.user.has_perm('odk_logger.change_xform', xform):
         if request.POST.get('description'):
             audit = {
                 'xform': xform.id_string
@@ -660,7 +659,8 @@ def edit(request, username, id_string):
                 }, audit, request)
             MetaData.supporting_docs(xform, request.FILES['doc'])
 
-        xform.update()
+        # Why?! this only calls xforms save super()
+        #xform.update()
 
         if request.is_ajax():
             return HttpResponse(_(u'Update succeeded.'))
@@ -1060,6 +1060,9 @@ def show_submission(request, username, id_string, uuid):
 @login_required
 def delete_data(request, username=None, id_string=None):
     xform, owner = check_and_set_user_and_form(username, id_string, request)
+    if not request.user.has_perm('odk_logger.delete_xform', xform):
+        return HttpResponseForbidden(_(u'Not permitted, see your administrator.'))
+
     response_text = u''
     if not xform:
         return HttpResponseForbidden(_(u'Not shared.'))

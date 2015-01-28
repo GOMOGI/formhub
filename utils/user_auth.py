@@ -66,7 +66,7 @@ def has_permission(xform, owner, request, shared=False):
 
 def has_edit_permission(xform, owner, request, shared=False):
     user = request.user
-    return (shared and xform.shared_data) or owner == user or\
+    return (shared and xform.shared_data) or\
         user.has_perm('odk_logger.change_xform', xform)
 
 
