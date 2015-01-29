@@ -159,8 +159,8 @@ class XForm(models.Model):
         super(XForm, self).save(*args, **kwargs)
         if self.pk != original_pk:
             print "Setting perms for ", self.pk
-            #for perm in get_perms_for_model(XForm):
-            #    assign_perm(perm.codename, self.user, self)
+            for perm in get_perms_for_model(XForm):
+                assign_perm(perm.codename, self.user, self)
 
 
     def __unicode__(self):

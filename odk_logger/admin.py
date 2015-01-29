@@ -16,7 +16,7 @@ class FormAdmin(GuardedModelAdmin):
         return qs.filter(user=request.user)
 
     list_filter = ('date_modified', 'form_active', 'user',)
-    search_fields = ['user__username', 'id']
+    search_fields = ['user__username', 'title']
 
 
 

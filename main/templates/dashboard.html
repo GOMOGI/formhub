@@ -102,7 +102,7 @@
     </div>
 </div>
 </section>
-{% include "published_surveys.html" %}
+{% include "published_surveys.html" with request=request %}
 <p>
 {% blocktrans with odk_url=odk_url %}
 The url "of" this web application <strong>{{ odk_url }}</strong>

@@ -236,8 +236,10 @@ def data_export(request, username, id_string, export_type):
     owner = get_object_or_404(User, username=username)
     xform = get_object_or_404(XForm, id_string=id_string, user=owner)
     helper_auth_helper(request)
-    if not has_permission(xform, owner, request):
-        return HttpResponseForbidden(_(u'Not shared.'))
+    can_edit =  request.user.has_perm('odk_logger.change_xform', xform)
+    if not can_edit:
+        return HttpResponseForbidden(_(u'You do not have permission to export '
+                                        'this form'))
     query = request.GET.get("query")
     extension = export_type
 
@@ -319,8 +321,10 @@ def data_export(request, username, id_string, export_type):
 def create_export(request, username, id_string, export_type):
     owner = get_object_or_404(User, username=username)
     xform = get_object_or_404(XForm, id_string=id_string, user=owner)
-    if not has_permission(xform, owner, request):
-        return HttpResponseForbidden(_(u'Not shared.'))
+    can_edit =  request.user.has_perm('odk_logger.change_xform', xform)
+    if not can_edit:
+        return HttpResponseForbidden(_(u'You do not have permission to export '
+                                        'this form'))
 
     query = request.POST.get("query")
     force_xlsx = request.POST.get('xls') != 'true'
@@ -386,6 +390,15 @@ def _get_google_token(request, redirect_to_url):
 
 
 def export_list(request, username, id_string, export_type):
+    owner = get_object_or_404(User, username=username)
+    xform = get_object_or_404(XForm, id_string=id_string, user=owner)
+    if not has_permission(xform, owner, request):
+        return HttpResponseForbidden(_(u'Not shared.'))
+
+    can_edit =  request.user.has_perm('odk_logger.change_xform', xform)
+    if not can_edit:
+        return HttpResponseForbidden(_(u'You do not have permission to export '
+                                        'this form'))
     if export_type == Export.GDOC_EXPORT:
         redirect_url = reverse(
             export_list,
@@ -395,11 +408,6 @@ def export_list(request, username, id_string, export_type):
         token = _get_google_token(request, redirect_url)
         if isinstance(token, HttpResponse):
             return token
-    owner = get_object_or_404(User, username=username)
-    xform = get_object_or_404(XForm, id_string=id_string, user=owner)
-    if not has_permission(xform, owner, request):
-        return HttpResponseForbidden(_(u'Not shared.'))
-
     # This creates an automatic export when they system believes there is no existing download available
     # or if the available downloads are considered outdated.
     #
@@ -486,6 +494,10 @@ def export_progress(request, username, id_string, export_type):
 def export_download(request, username, id_string, export_type, filename):
     owner = get_object_or_404(User, username=username)
     xform = get_object_or_404(XForm, id_string=id_string, user=owner)
+    can_edit =  request.user.has_perm('odk_logger.change_xform', xform)
+    if not can_edit:
+        return HttpResponseForbidden(_(u'You do not have permission to export '
+                                        'this form'))
     helper_auth_helper(request)
     if not has_permission(xform, owner, request):
         return HttpResponseForbidden(_(u'Not shared.'))
@@ -562,6 +574,10 @@ def delete_export(request, username, id_string, export_type):
 def zip_export(request, username, id_string):
     owner = get_object_or_404(User, username=username)
     xform = get_object_or_404(XForm, id_string=id_string, user=owner)
+    can_edit =  request.user.has_perm('odk_logger.change_xform', xform)
+    if not can_edit:
+        return HttpResponseForbidden(_(u'You do not have permission to export '
+                                        'this form'))
     helper_auth_helper(request)
     if not has_permission(xform, owner, request):
         return HttpResponseForbidden(_(u'Not shared.'))
@@ -600,6 +616,10 @@ def kml_export(request, username, id_string):
     context.message = "HELLO!!"
     owner = get_object_or_404(User, username=username)
     xform = get_object_or_404(XForm, id_string=id_string, user=owner)
+    can_edit =  request.user.has_perm('odk_logger.change_xform', xform)
+    if not can_edit:
+        return HttpResponseForbidden(_(u'You do not have permission to export '
+                                        'this form'))
     helper_auth_helper(request)
     if not has_permission(xform, owner, request):
         return HttpResponseForbidden(_(u'Not shared.'))
@@ -630,6 +650,12 @@ def kml_export(request, username, id_string):
 
 
 def google_xls_export(request, username, id_string):
+    owner = get_object_or_404(User, username=username)
+    xform = get_object_or_404(XForm, id_string=id_string, user=owner)
+    can_edit =  request.user.has_perm('odk_logger.change_xform', xform)
+    if not can_edit:
+        return HttpResponseForbidden(_(u'You do not have permission to export '
+                                        'this form'))
     token = None
     if request.user.is_authenticated():
         try:
@@ -645,8 +671,6 @@ def google_xls_export(request, username, id_string):
             google_xls_export,
             kwargs={'username': username, 'id_string': id_string})
         return HttpResponseRedirect(redirect_uri)
-    owner = get_object_or_404(User, username=username)
-    xform = get_object_or_404(XForm, id_string=id_string, user=owner)
     if not has_permission(xform, owner, request):
         return HttpResponseForbidden(_(u'Not shared.'))
     valid, dd = dd_for_params(id_string, owner, request)
@@ -715,15 +739,9 @@ def attachment_url(request, size='medium'):
 
     if not attachment.mimetype.startswith('image'):
         return redirect(attachment.media_file.url)
-    try:
-        media_url = image_url(attachment, size)
-    except:
-        # TODO: log this somewhere
-        # image not found, 404, S3ResponseError timeouts
-        pass
-    else:
-        if media_url:
-            return redirect(media_url)
+    media_url = image_url(attachment, size)
+    if media_url:
+        return redirect(media_url)
     return HttpResponseNotFound(_(u'Error: Attachment not found'))
 
 

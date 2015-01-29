@@ -176,6 +176,9 @@ def enketo_url(form_url, id_string, instance_xml=None,
 
     req = requests.post(url, data=values,
                         auth=(settings.ENKETO_API_TOKEN, '')) #, verify=False)
+    import pprint
+    pprint.pprint(url)
+    pprint.pprint(req.json())
     if req.status_code in [200, 201]:
         try:
             response = req.json()
