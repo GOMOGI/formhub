@@ -188,9 +188,8 @@ INSTALLED_APPS = (
     'guardian',
     'djcelery',
     'stats',
-    'sms_support',
-#    'django_nose',
-)
+    'sms_support',)
+
 
 OAUTH2_PROVIDER = {
     # this is the list of available scopes

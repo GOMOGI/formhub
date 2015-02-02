@@ -11,7 +11,7 @@ from django.contrib import messages
 from django.http import HttpResponse, HttpResponseBadRequest, \
     HttpResponseRedirect, HttpResponseForbidden, HttpResponseNotFound,\
     HttpResponseServerError, Http404
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import loader, RequestContext
 from django.utils.translation import ugettext as _
 from django.views.decorators.http import require_GET, require_POST,\
@@ -170,7 +170,9 @@ def profile(request, username):
     if request.method == 'POST' and request.user.is_authenticated():
         def set_form():
             form = QuickConverter(request.POST, request.FILES)
-            survey = form.publish(request.user).survey
+            published_form  = form.publish(request.user)
+            if not published_form.is_valid():
+                return
 
             audit = {}
             audit_log(
@@ -211,6 +213,7 @@ def profile(request, username):
                 context.message = form_result
         else:
             context.message = form_result
+
 
     # profile view...
     # for the same user -> dashboard
@@ -332,7 +335,7 @@ def show(request, username=None, id_string=None, uuid=None):
     ) > 0
     context.public_link = MetaData.public_link(xform)
     context.is_owner = is_owner
-    context.can_edit = can_edit and request.user.profile.role >= 10
+    context.can_edit = can_edit
     context.can_view = can_view or request.session.get('public_link')
     context.xform = xform
     context.content_user = xform.user
@@ -615,12 +618,7 @@ def edit(request, username, id_string):
                 if compat['type'] == 'alert-error':
                     xform.allows_sms = False
                     xform.sms_id_string = pid
-                try:
-                    xform.save()
-                except IntegrityError:
-                    # unfortunately, there's no feedback mechanism here
-                    xform.allows_sms = pe
-                    xform.sms_id_string = pid
+                xform.save()
 
         elif request.FILES.get('media'):
             audit = {
@@ -659,8 +657,7 @@ def edit(request, username, id_string):
                 }, audit, request)
             MetaData.supporting_docs(xform, request.FILES['doc'])
 
-        # Why?! this only calls xforms save super()
-        #xform.update()
+        xform.save()
 
         if request.is_ajax():
             return HttpResponse(_(u'Update succeeded.'))

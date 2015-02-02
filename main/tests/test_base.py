@@ -39,16 +39,16 @@ class MainTestCase(TestCase):
         self._teardown_test_environment()
 
         settings.MONGO_DB.instances.drop()
-        
-        
+
+
     def _setup_test_environment(self):
         "Create temp directory and update MEDIA_ROOT and default storage."
         if not hasattr(settings, "_original_media_root" ):
             settings._original_media_root = settings.MEDIA_ROOT
- 
+
         if not hasattr(settings, "_original_file_storage" ):
             settings._original_file_storage = settings.DEFAULT_FILE_STORAGE
-         
+
         if not hasattr(self, "_temp_media" ):
             self._temp_media = tempfile.mkdtemp()
             settings.MEDIA_ROOT = self._temp_media
@@ -60,16 +60,16 @@ class MainTestCase(TestCase):
         if hasattr(self, "_temp_media" ):
             shutil.rmtree(self._temp_media, ignore_errors=True)
             del self._temp_media
-             
+
         if hasattr(settings, "_original_media_root" ):
             settings.MEDIA_ROOT = settings._original_media_root
             del settings._original_media_root
-         
+
         if hasattr(settings, "_original_file_storage" ):
             settings.DEFAULT_FILE_STORAGE = settings._original_file_storage
             del settings._original_file_storage
 
-        
+
     def _create_user(self, username, password):
         user, created = User.objects.get_or_create(username=username)
         user.set_password(password)
@@ -160,7 +160,7 @@ class MainTestCase(TestCase):
                          touchforms=False, forced_submission_time=None):
         # store temporary file with dynamic uuid
         tmp_file = None
-        
+
         if add_uuid and not touchforms:
             tmp_file = NamedTemporaryFile(delete=False)
             split_xml = None
@@ -172,7 +172,7 @@ class MainTestCase(TestCase):
             tmp_file.write(''.join(split_xml))
             path = tmp_file.name
             tmp_file.close()
-        
+
         with open(path) as f:
             post_data = {'xml_submission_file': f}
 
@@ -184,7 +184,7 @@ class MainTestCase(TestCase):
                 post_data['uuid'] = self.xform.uuid
             if touchforms:
                 url = '/submission'  # touchform has no username
-            
+
             self.response = self.anon.post(url, post_data)
 
         if forced_submission_time:

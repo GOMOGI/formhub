@@ -60,7 +60,7 @@ class FormLicenseForm(forms.Form):
                                          'id': 'form-license'}))
 
 class RoleForm(forms.Form):
-    
+
     role = forms.ChoiceField(choices=UserProfile.ROLES, widget=forms.Select())
 
     def __init__(self, *args, **kwargs):
@@ -291,6 +291,10 @@ class QuickConverter(QuickConverterFile, QuickConverterURL,
             else:
                 cleaned_xls_file = self.cleaned_data['xls_file']
 
+                if not id_string:
+                    id_string = cleaned_xls_file.name[:-4] + '_' + ''.join(
+                        random.sample("abcdefghijklmnopqrstuvwxyz0123456789", 6))
+
                 if cleaned_xls_file and not settings.TESTING_MODE:
                     #We need to save it here so if the file already exists we get the _N filename
                     cleaned_xls_file = default_storage.save(\
@@ -301,22 +305,29 @@ class QuickConverter(QuickConverterFile, QuickConverterURL,
                 cleaned_url = self.cleaned_data['xls_url']
                 if cleaned_url.strip() == u'':
                     cleaned_url = self.cleaned_data['dropbox_xls_url']
-                cleaned_xls_file = urlparse(cleaned_url)
-                cleaned_xls_file = \
+                cleaned_xls_filename = urlparse(cleaned_url)
+                cleaned_xls_filename = \
                     '_'.join(cleaned_xls_file.path.split('/')[-2:])
 
-                if cleaned_xls_file[-4:] != '.xls':
-                    cleaned_xls_file += '.xls'
+                if cleaned_xls_filename[-4:] != '.xls':
+                    cleaned_xls_filename += '.xls'
 
                 cleaned_xls_file = \
-                    upload_to(None, cleaned_xls_file, user.username)
+                    upload_to(None, cleaned_xls_filename, user.username)
 
                 self.validate(cleaned_url)
                 xls_data = ContentFile(urllib2.urlopen(cleaned_url).read())
                 cleaned_xls_file = \
                     default_storage.save(cleaned_xls_file, xls_data)
+                if not id_string:
+                    id_string = cleaned_xls_filename[:-4] + '_' + ''.join(
+                        random.sample("abcdefghijklmnopqrstuvwxyz0123456789", 6))
             # publish the xls
+            #import ipdb
+            #ipdb.set_trace()
             return publish_xls_form(cleaned_xls_file, user, id_string)
+
+
 
 
 class ActivateSMSSupportFom(forms.Form):

@@ -114,9 +114,9 @@ class XForm(models.Model):
     def _set_title(self):
         text = re.sub(r"\s+", " ", self.xml)
         matches = re.findall(r"<h:title>([^<]+)</h:title>", text)
-        if len(matches) != 1:
+        if len(matches) > 1:
             raise XLSFormError(_("There should be a single title."), matches)
-        self.title = u"" if not matches else matches[0]
+        self.title = self.id_string if not matches else matches[0]
 
     def _set_encrypted_field(self):
         if self.json and self.json != '':
@@ -131,9 +131,9 @@ class XForm(models.Model):
         super(XForm, self).save(*args, **kwargs)
 
     def save(self, *args, **kwargs):
-        self._set_title()
         old_id_string = self.id_string
-        self._set_id_string()
+        if not old_id_string:
+            self._set_id_string()
         self._set_encrypted_field()
         # check if we have an existing id_string,
         # if so, the one must match but only if xform is NOT new
@@ -158,6 +158,7 @@ class XForm(models.Model):
         original_pk = self.pk
         super(XForm, self).save(*args, **kwargs)
         if self.pk != original_pk:
+            self._set_title()
             print "Setting perms for ", self.pk
             for perm in get_perms_for_model(XForm):
                 assign_perm(perm.codename, self.user, self)
@@ -219,6 +220,7 @@ class XForm(models.Model):
 
 
 def stats_forms_created(sender, instance, created, **kwargs):
+    print "created ", instance, created
     if created:
         stat_log.delay('formhub-forms-created', 1)
 
