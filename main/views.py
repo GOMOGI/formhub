@@ -171,6 +171,8 @@ def profile(request, username):
         def set_form():
             form = QuickConverter(request.POST, request.FILES)
 
+            published_form  = form.publish(request.user)
+            survey = published_form.survey
             audit = {}
             audit_log(
                 Actions.FORM_PUBLISHED, request.user, content_user,
