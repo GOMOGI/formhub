@@ -260,35 +260,10 @@ def store_temp_file(data):
 def publish_form(callback):
     try:
         return callback()
-    except (PyXFormError, XLSFormError) as e:
-        return {
-            'type': 'alert-error',
-            'text': e
-        }
-    except IntegrityError as e:
-        return {
-            'type': 'alert-error',
-            'text': e,
-        }
-    except ValidationError as e:
-        # on clone invalid URL
-        return {
-            'type': 'alert-error',
-            'text': e,
-        }
-    except AttributeError as e:
-        # form.publish returned None, not sure why...
-        return {
-            'type': 'alert-error',
-            'text': e
-        }
-#    except ProcessTimedOut as e:
-#        # catch timeout errors
-#        return {
-#            'type': 'alert-error',
-#            'text': _(u'Form validation timeout, please try again.'),
-#        }
     except Exception, e:
+        from raven.contrib.django.raven_compat.models import client
+        client.captureException()
+
         # error in the XLS file; show an error to the user
         return {
             'type': 'alert-error',

@@ -170,9 +170,6 @@ def profile(request, username):
     if request.method == 'POST' and request.user.is_authenticated():
         def set_form():
             form = QuickConverter(request.POST, request.FILES)
-            published_form  = form.publish(request.user)
-            if not published_form.is_valid():
-                return
 
             audit = {}
             audit_log(
