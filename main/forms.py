@@ -295,6 +295,11 @@ class QuickConverter(QuickConverterFile, QuickConverterURL,
                     id_string = cleaned_xls_file.name[:-4] + '_' + ''.join(
                         random.sample("abcdefghijklmnopqrstuvwxyz0123456789", 6))
 
+                allowed_chars = 'abcdefghijklmnopqrstuwvxyz01234567890_-'
+                id_string = ''.join([ x if x in allowed_chars else '-'
+                    for x in id_string])
+
+
                 if cleaned_xls_file and not settings.TESTING_MODE:
                     #We need to save it here so if the file already exists we get the _N filename
                     cleaned_xls_file = default_storage.save(\
