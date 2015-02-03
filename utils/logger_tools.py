@@ -261,8 +261,6 @@ def publish_form(callback):
     try:
         return callback()
     except Exception, e:
-        from raven.contrib.django.raven_compat.models import client
-        client.captureException()
 
         # error in the XLS file; show an error to the user
         return {

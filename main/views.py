@@ -168,10 +168,15 @@ def profile(request, username):
     context.form = QuickConverter()
     # xlsform submission...
     if request.method == 'POST' and request.user.is_authenticated():
-        def set_form():
-            form = QuickConverter(request.POST, request.FILES)
+        form = QuickConverter(request.POST, request.FILES)
 
-            published_form  = form.publish(request.user)
+        published_form  = form.publish(request.user)
+        if not published_form:
+            form_result = {
+                'type': 'alert-error',
+                'text': form.errors
+            }
+        else:
             survey = published_form.survey
             audit = {}
             audit_log(
@@ -182,9 +187,9 @@ def profile(request, username):
                 }, audit, request)
             enketo_webform_url = reverse(
                 enter_data,
-                kwargs={'username': username, 'id_string': survey.id_string}
+                kwargs={'username': username, 'id_string': published_form.id_string}
             )
-            return {
+            form_result = {
                 'type': 'alert-success',
                 'preview_url': reverse(enketo_preview, kwargs={
                     'username': username,
@@ -198,8 +203,6 @@ def profile(request, username):
                     'form_url': enketo_webform_url},
                 'form_o': survey
             }
-
-        form_result = publish_form(set_form)
 
         if form_result['type'] == 'alert-success':
             # comment the following condition (and else)

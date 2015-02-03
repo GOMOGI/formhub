@@ -192,8 +192,6 @@ class MainTestCase(TestCase):
             instance.date_created = forced_submission_time
             instance.save()
             instance.parsed_instance.save()
-        import ipdb
-        ipdb.set_trace()
         # remove temporary file if stored
         if add_uuid and not touchforms:
             os.unlink(tmp_file.name)
