@@ -1,4 +1,5 @@
 import random
+import string
 import re
 import urllib2
 from urlparse import urlparse
@@ -291,13 +292,11 @@ class QuickConverter(QuickConverterFile, QuickConverterURL,
             else:
                 cleaned_xls_file = self.cleaned_data['xls_file']
 
+
                 if not id_string:
                     id_string = cleaned_xls_file.name[:-4] + '_' + ''.join(
                         random.sample("abcdefghijklmnopqrstuvwxyz0123456789", 6))
 
-                allowed_chars = 'abcdefghijklmnopqrstuwvxyz01234567890_-'
-                id_string = ''.join([ x if x in allowed_chars else '-'
-                    for x in id_string])
 
 
                 if cleaned_xls_file and not settings.TESTING_MODE:
@@ -330,6 +329,13 @@ class QuickConverter(QuickConverterFile, QuickConverterURL,
             # publish the xls
             #import ipdb
             #ipdb.set_trace()
+            allowed_chars = 'abcdefghijklmnopqrstuwvxyz01234567890_-'
+            id_string = ''.join([ x if x in allowed_chars else '-'
+                for x in id_string.lower()])
+
+            cleaned_xls_file.name = ''.join([ x if x in string.ascii_letters + string.digits + '-.' else '-'
+                for x in cleaned_xls_file.name ])
+
             return publish_xls_form(cleaned_xls_file, user, id_string)
 
 
