@@ -53,6 +53,7 @@ from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 from django.template.defaultfilters import urlencode
 from main.google_doc import GoogleDoc
+from pyxform.errors import PyXFormError
 
 
 @receiver(user_registered, dispatch_uid='auto_add_crowdform')
@@ -170,13 +171,8 @@ def profile(request, username):
     if request.method == 'POST' and request.user.is_authenticated():
         form = QuickConverter(request.POST, request.FILES)
 
-        published_form  = form.publish(request.user)
-        if not published_form:
-            form_result = {
-                'type': 'alert-error',
-                'text': form.errors
-            }
-        else:
+        try:
+            published_form  = form.publish(request.user)
             survey = published_form.survey
             audit = {}
             audit_log(
@@ -202,6 +198,11 @@ def profile(request, username):
                 % {'form_id': survey.id_string,
                     'form_url': enketo_webform_url},
                 'form_o': survey
+            }
+        except PyXFormError as e:
+            form_result = {
+                'type': 'alert-error',
+                'text': e
             }
 
         if form_result['type'] == 'alert-success':
