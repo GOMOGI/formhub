@@ -221,7 +221,7 @@ def profile(request, username):
 
             form_result = {
                 'type': 'alert-error',
-                'text': 'Something bad happend. ' +  e
+                'text': 'Something bad happend. ' +  str(e)
             }
 
         if form_result['type'] == 'alert-success':
