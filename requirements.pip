@@ -32,6 +32,7 @@ pymongo==2.6.3
 python-digest==1.7
 pytz>=2013b
 pyxform==0.9.20
+raven==5.1.1
 recaptcha-client==1.0.6
 requests==2.0.1
 South==0.8.2
