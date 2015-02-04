@@ -173,36 +173,55 @@ def profile(request, username):
 
         try:
             published_form  = form.publish(request.user)
-            survey = published_form.survey
-            audit = {}
-            audit_log(
-                Actions.FORM_PUBLISHED, request.user, content_user,
-                _("Published form '%(id_string)s'.") %
-                {
-                    'id_string': survey.id_string,
-                }, audit, request)
-            enketo_webform_url = reverse(
-                enter_data,
-                kwargs={'username': username, 'id_string': published_form.id_string}
-            )
-            form_result = {
-                'type': 'alert-success',
-                'preview_url': reverse(enketo_preview, kwargs={
-                    'username': username,
-                    'id_string': survey.id_string
-                }),
-                'text': _(u'Successfully published %(form_id)s.'
-                          u' <a href="%(form_url)s">Enter Web Form</a>'
-                          u' or <a href="#preview-modal" data-toggle="modal">'
-                          u'Preview Web Form</a>')
-                % {'form_id': survey.id_string,
-                    'form_url': enketo_webform_url},
-                'form_o': survey
-            }
+            if not published_form:
+                form_result = {
+                    'type': 'alert-error',
+                    'text': published_form.errors
+                }
+            else:
+                survey = published_form.survey
+                audit = {}
+                audit_log(
+                    Actions.FORM_PUBLISHED, request.user, content_user,
+                    _("Published form '%(id_string)s'.") %
+                    {
+                        'id_string': survey.id_string,
+                    }, audit, request)
+                enketo_webform_url = reverse(
+                    enter_data,
+                    kwargs={'username': username, 'id_string': published_form.id_string}
+                )
+                form_result = {
+                    'type': 'alert-success',
+                    'preview_url': reverse(enketo_preview, kwargs={
+                        'username': username,
+                        'id_string': survey.id_string
+                    }),
+                    'text': _(u'Successfully published %(form_id)s.'
+                              u' <a href="%(form_url)s">Enter Web Form</a>'
+                              u' or <a href="#preview-modal" data-toggle="modal">'
+                              u'Preview Web Form</a>')
+                    % {'form_id': survey.id_string,
+                        'form_url': enketo_webform_url},
+                    'form_o': survey
+                }
         except PyXFormError as e:
+            # log the exception
+            from raven.contrib.django.raven_compat.models import client
+            client.captureException()
+
             form_result = {
                 'type': 'alert-error',
                 'text': e
+            }
+        except Exception as e:
+            # log the exception
+            from raven.contrib.django.raven_compat.models import client
+            client.captureException()
+
+            form_result = {
+                'type': 'alert-error',
+                'text': 'Something bad happend. ' +  e
             }
 
         if form_result['type'] == 'alert-success':
