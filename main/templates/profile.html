@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load i18n %}
+{% load i18n guardian_tags %}
 
 {% block content %}
     {% if show_dashboard %}
@@ -92,6 +92,7 @@
                 <td>
             {% if form.shared_data %}
                 {% if form.submission_count %}
+
                 <div class="data-download">
                   <span class="vertical-middle">
                     <i class="icon-download icon-large"></i>

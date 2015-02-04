@@ -188,9 +188,8 @@ INSTALLED_APPS = (
     'guardian',
     'djcelery',
     'stats',
-    'sms_support',
-#    'django_nose',
-)
+    'sms_support',)
+
 
 OAUTH2_PROVIDER = {
     # this is the list of available scopes
@@ -213,8 +212,8 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.DjangoModelPermissions'
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'oauth2_provider.ext.rest_framework.OAuth2Authentication',
-        #'rest_framework.authentication.BasicAuthentication',
+        #'oauth2_provider.ext.rest_framework.OAuth2Authentication',
+        'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
     )

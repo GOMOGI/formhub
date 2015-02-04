@@ -11,7 +11,7 @@ from django.contrib import messages
 from django.http import HttpResponse, HttpResponseBadRequest, \
     HttpResponseRedirect, HttpResponseForbidden, HttpResponseNotFound,\
     HttpResponseServerError, Http404
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import loader, RequestContext
 from django.utils.translation import ugettext as _
 from django.views.decorators.http import require_GET, require_POST,\
@@ -53,6 +53,7 @@ from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 from django.template.defaultfilters import urlencode
 from main.google_doc import GoogleDoc
+from pyxform.errors import PyXFormError
 
 
 @receiver(user_registered, dispatch_uid='auto_add_crowdform')
@@ -168,37 +169,60 @@ def profile(request, username):
     context.form = QuickConverter()
     # xlsform submission...
     if request.method == 'POST' and request.user.is_authenticated():
-        def set_form():
-            form = QuickConverter(request.POST, request.FILES)
-            survey = form.publish(request.user).survey
+        form = QuickConverter(request.POST, request.FILES)
 
-            audit = {}
-            audit_log(
-                Actions.FORM_PUBLISHED, request.user, content_user,
-                _("Published form '%(id_string)s'.") %
-                {
-                    'id_string': survey.id_string,
-                }, audit, request)
-            enketo_webform_url = reverse(
-                enter_data,
-                kwargs={'username': username, 'id_string': survey.id_string}
-            )
-            return {
-                'type': 'alert-success',
-                'preview_url': reverse(enketo_preview, kwargs={
-                    'username': username,
-                    'id_string': survey.id_string
-                }),
-                'text': _(u'Successfully published %(form_id)s.'
-                          u' <a href="%(form_url)s">Enter Web Form</a>'
-                          u' or <a href="#preview-modal" data-toggle="modal">'
-                          u'Preview Web Form</a>')
-                % {'form_id': survey.id_string,
-                    'form_url': enketo_webform_url},
-                'form_o': survey
+        try:
+            published_form  = form.publish(request.user)
+            if not published_form:
+                form_result = {
+                    'type': 'alert-error',
+                    'text': published_form.errors
+                }
+            else:
+                survey = published_form.survey
+                audit = {}
+                audit_log(
+                    Actions.FORM_PUBLISHED, request.user, content_user,
+                    _("Published form '%(id_string)s'.") %
+                    {
+                        'id_string': survey.id_string,
+                    }, audit, request)
+                enketo_webform_url = reverse(
+                    enter_data,
+                    kwargs={'username': username, 'id_string': published_form.id_string}
+                )
+                form_result = {
+                    'type': 'alert-success',
+                    'preview_url': reverse(enketo_preview, kwargs={
+                        'username': username,
+                        'id_string': survey.id_string
+                    }),
+                    'text': _(u'Successfully published %(form_id)s.'
+                              u' <a href="%(form_url)s">Enter Web Form</a>'
+                              u' or <a href="#preview-modal" data-toggle="modal">'
+                              u'Preview Web Form</a>')
+                    % {'form_id': survey.id_string,
+                        'form_url': enketo_webform_url},
+                    'form_o': survey
+                }
+        except PyXFormError as e:
+            # log the exception
+            from raven.contrib.django.raven_compat.models import client
+            client.captureException()
+
+            form_result = {
+                'type': 'alert-error',
+                'text': e
             }
+        except Exception as e:
+            # log the exception
+            from raven.contrib.django.raven_compat.models import client
+            client.captureException()
 
-        form_result = publish_form(set_form)
+            form_result = {
+                'type': 'alert-error',
+                'text': 'Something bad happend. ' +  str(e)
+            }
 
         if form_result['type'] == 'alert-success':
             # comment the following condition (and else)
@@ -211,6 +235,7 @@ def profile(request, username):
                 context.message = form_result
         else:
             context.message = form_result
+
 
     # profile view...
     # for the same user -> dashboard
@@ -332,7 +357,7 @@ def show(request, username=None, id_string=None, uuid=None):
     ) > 0
     context.public_link = MetaData.public_link(xform)
     context.is_owner = is_owner
-    context.can_edit = can_edit and request.user.profile.role >= 10
+    context.can_edit = can_edit
     context.can_view = can_view or request.session.get('public_link')
     context.xform = xform
     context.content_user = xform.user
@@ -480,7 +505,7 @@ def edit(request, username, id_string):
 
         # ensure is crowdform
         if xform.is_crowd_form:
-            if crowdform_action == 'delete':
+            if crowdform_action == 'delete' and request.user.has_perm('odk_logger.delete_xform', xform):
                 MetaData.objects.get(
                     xform__id_string=id_string,
                     data_value=request_username,
@@ -493,8 +518,7 @@ def edit(request, username, id_string):
                 'username': request_username
             }))
 
-    if username == request.user.username or\
-            request.user.has_perm('odk_logger.change_xform', xform):
+    if request.user.has_perm('odk_logger.change_xform', xform):
         if request.POST.get('description'):
             audit = {
                 'xform': xform.id_string
@@ -616,12 +640,7 @@ def edit(request, username, id_string):
                 if compat['type'] == 'alert-error':
                     xform.allows_sms = False
                     xform.sms_id_string = pid
-                try:
-                    xform.save()
-                except IntegrityError:
-                    # unfortunately, there's no feedback mechanism here
-                    xform.allows_sms = pe
-                    xform.sms_id_string = pid
+                xform.save()
 
         elif request.FILES.get('media'):
             audit = {
@@ -660,7 +679,7 @@ def edit(request, username, id_string):
                 }, audit, request)
             MetaData.supporting_docs(xform, request.FILES['doc'])
 
-        xform.update()
+        xform.save()
 
         if request.is_ajax():
             return HttpResponse(_(u'Update succeeded.'))
@@ -1060,6 +1079,9 @@ def show_submission(request, username, id_string, uuid):
 @login_required
 def delete_data(request, username=None, id_string=None):
     xform, owner = check_and_set_user_and_form(username, id_string, request)
+    if not request.user.has_perm('odk_logger.delete_xform', xform):
+        return HttpResponseForbidden(_(u'Not permitted, see your administrator.'))
+
     response_text = u''
     if not xform:
         return HttpResponseForbidden(_(u'Not shared.'))

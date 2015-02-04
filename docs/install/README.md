@@ -21,7 +21,7 @@ $ sudo apt-get install -y git build-essential python-all-dev \
   libjpeg-dev libfreetype6-dev zlib1g-dev rabbitmq-server libxslt1-dev
 ```
 
-## 2. Define the formhub user account 
+## 2. Define the formhub user account
 
 Create <tt>fhuser</tt>, the user account which will own and run the formhub processes, and set its password:
 
@@ -54,7 +54,7 @@ $ echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen' 
 Then finally for either system:
 ```
 $ sudo apt-get update
-$ sudo apt-get install mongodb-org 
+$ sudo apt-get install mongodb-org
 ```
 
 ## 4. Install [PostgreSQL](http://www.postgresql.org/)
@@ -90,7 +90,7 @@ Unless you already have a valid [SSL certificate](https://help.ubuntu.com/12.04/
 
 ```
 $ sudo vi postgresql.conf
-# (edit lines 41 and 80 -- here is the before and after) 
+# (edit lines 41 and 80 -- here is the before and after)
 $ diff postgresql.conf.org postgresql.conf
 41c41
 < data_directory = '/var/lib/postgresql/9.1/main'		# use data in another directory
@@ -104,7 +104,7 @@ $ diff postgresql.conf.org postgresql.conf
 Switch to the <tt>postgres</tt> account and initialize the database and database user for access by the formhub [django](https://www.djangoproject.com/) application.
 
 ```
-$ sudo su - postgres 
+$ sudo su - postgres
 $ /usr/lib/postgresql/9.1/bin/initdb -D /opt/data/formhub/pgsql
 $ /usr/lib/postgresql/9.1/bin/pg_ctl -D /opt/data/formhub/pgsql -l logfile start
 $ /usr/lib/postgresql/9.1/bin/createuser -P formhubDjangoApp
@@ -142,7 +142,7 @@ $ exit
 ```
 Continue as the root or sudo user to edit the <tt>pg_hba.conf</tt> file for database access security.
 
-As always, copy the existing configuration file first, before making any edits, then change line 90 from <tt>peer</tt> to <tt>md5</tt> (for more about these options, see the [pg_hba.conf](http://www.postgresql.org/docs/9.3/static/auth-pg-hba-conf.html) file documentation): 
+As always, copy the existing configuration file first, before making any edits, then change line 90 from <tt>peer</tt> to <tt>md5</tt> (for more about these options, see the [pg_hba.conf](http://www.postgresql.org/docs/9.3/static/auth-pg-hba-conf.html) file documentation):
 
 ```
 $ cd /etc/postgresql/9.1/main
@@ -166,16 +166,16 @@ $ /usr/lib/postgresql/9.1/bin/psql -d FormhubDjangoDB -U formhubDjangoApp -h loc
 If your configurations are correct, you should be prompted for a password, like this:
 
 ```
-Password for user formhubDjangoApp: 
+Password for user formhubDjangoApp:
 ```
 
 You can either input the password you used to create the <tt>formhubDjangoApp</tt> user earlier, then type <tt>\q</tt> to exit, or just <tt>Control-C</tt> to quit.
 
-*Phew!* 
+*Phew!*
 
 That was a lot of work, but your databases are ready, and you won't have to touch these settings again, even if you have to reboot or restart the server later.
 
-## 5. Install formhub 
+## 5. Install formhub
 
 Switch to the <tt>fhuser</tt> account and make sure you are in the home folder of the correct account:
 
@@ -185,12 +185,12 @@ $ pwd
 $ whoami
 ```
 
-You should see <tt>/home/fhuser</tt> as the result of the <tt>pwd</tt> command, and <tt>fhuser</tt> as the result of <tt>whoami</tt>. 
+You should see <tt>/home/fhuser</tt> as the result of the <tt>pwd</tt> command, and <tt>fhuser</tt> as the result of <tt>whoami</tt>.
 
 Obtain the [formhub source](https://github.com/SEL-Columbia/formhub.git) from [github](https://github.com/):
 
 ```
-$ git clone https://github.com/SEL-Columbia/formhub.git
+$ git clone --recursive https://github.com/SEL-Columbia/formhub.git
 ```
 
 *If you are using this guide before this branch (<tt>slim_dedicated_server</tt>) has been merged into the formhub master branch, then you will need to use [git's checkout](http://csurs.csr.uky.edu/cgi-bin/man/man2html?1+git-checkout) command first, as follows:*
@@ -294,7 +294,7 @@ sudo /sbin/insserv celeryd
 
 ## 7. Start the server
 
-Now, you should be ready to bring up the server as user <tt>fhuser</tt> with django's [built-in web server](https://docs.djangoproject.com/en/1.5/ref/django-admin/#runserver-port-or-address-port): 
+Now, you should be ready to bring up the server as user <tt>fhuser</tt> with django's [built-in web server](https://docs.djangoproject.com/en/1.5/ref/django-admin/#runserver-port-or-address-port):
 
 ```
 $ cd ~/formhub
@@ -371,7 +371,7 @@ $ sudo vi sources.list
 $ diff sources.list.org sources.list
 # (after editing the sources.list file)
 15a16,19
-> 
+>
 > # nginx
 > deb http://nginx.org/packages/debian/ wheezy nginx
 > deb-src http://nginx.org/packages/debian/ wheezy nginx
@@ -383,7 +383,7 @@ You should be able to see the nginx server running by visiting <tt>http://127.0.
 There should be a notice that says:
 
 > Welcome to nginx!
-> 
+>
 > If you see this page, the nginx web server is successfully installed and working. Further configuration is required.
 
 Finally, configure nginx to send all the Django requests to the uWSGI server and confirm they are correct:
@@ -419,7 +419,7 @@ $ sudo pip install -r /home/fhuser/formhub/requirements-dev.pip
 If you plan to use AWS for your formhub server, you should consider [using the public Formhub Amazon Machine Image (AMI)](https://github.com/SEL-Columbia/formhub/wiki/How-To-Run-Your-Own-Formhub-Instances-on-Amazon-Web-Services) instead, but if you would really do all this from scratch, you should also install the corresponding packages via pip:
 
 ```
-$ sudo pip install -r /home/fhuser/formhub/requirements-s3.pip  
+$ sudo pip install -r /home/fhuser/formhub/requirements-s3.pip
 $ sudo pip install -r /home/fhuser/formhub/requirements-ses.pip
 ```
 
@@ -430,6 +430,6 @@ Instead, add this line to your instance's <tt>/etc/rc.local</tt> file, just abov
 ```
 # By default this script does nothing.
 
-/etc/init.d/celeryd start 
+/etc/init.d/celeryd start
 exit 0
 ```

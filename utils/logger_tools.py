@@ -103,7 +103,7 @@ def create_instance(username, xml_file, media_files,
         # else, since we have a username, the Instance creation logic will
         # handle checking for the forms existence by its id_string
         if username and request and request.user.is_authenticated():
-        
+
             id_string = get_id_string_from_xml_str(xml)
             xform = XForm.objects.get(
                 id_string=id_string, user__username=username)
@@ -260,35 +260,8 @@ def store_temp_file(data):
 def publish_form(callback):
     try:
         return callback()
-    except (PyXFormError, XLSFormError) as e:
-        return {
-            'type': 'alert-error',
-            'text': e
-        }
-    except IntegrityError as e:
-        return {
-            'type': 'alert-error',
-            'text': _(u'Form with this id or SMS-keyword already exists.'),
-        }
-    except ValidationError as e:
-        # on clone invalid URL
-        return {
-            'type': 'alert-error',
-            'text': _(u'Invalid URL format.'),
-        }
-    except AttributeError as e:
-        # form.publish returned None, not sure why...
-        return {
-            'type': 'alert-error',
-            'text': e
-        }
-#    except ProcessTimedOut as e:
-#        # catch timeout errors
-#        return {
-#            'type': 'alert-error',
-#            'text': _(u'Form validation timeout, please try again.'),
-#        }
     except Exception, e:
+
         # error in the XLS file; show an error to the user
         return {
             'type': 'alert-error',
@@ -302,16 +275,16 @@ def publish_xls_form(xls_file, user, id_string=None):
     """
     # get or create DataDictionary based on user and id string
     if id_string:
-        dd = DataDictionary.objects.get(
+        dd, created = DataDictionary.objects.get_or_create(
             user=user, id_string=id_string)
         dd.xls = xls_file
         dd.save()
         return dd
-    else:
-        return DataDictionary.objects.create(
-            user=user,
-            xls=xls_file
-        )
+
+    return DataDictionary.objects.create(
+        user=user,
+        xls=xls_file
+    )
 
 
 def publish_xml_form(xml_file, user, id_string=None):

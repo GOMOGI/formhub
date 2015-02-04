@@ -29,8 +29,8 @@ class TestCrowdforms(MainTestCase):
         self.xform.is_crowd_form = False
         self.xform.save()
 
-    def _add_crowdform(self):
-        self._create_user_and_login(self.alice, self.alice)
+    def _add_crowdform(self, username='bob', password='bob'):
+        self._create_user_and_login(username=username, password=password)
         self.assertEqual(len(MetaData.crowdform_users(self.xform)),
                          self.crowdform_count)
         self.response = self.client.get(self.edit_url, {'crowdform': 'add'})
@@ -41,7 +41,7 @@ class TestCrowdforms(MainTestCase):
         self.assertEqual(self.response.status_code, 201)
 
     def test_other_user_can_submit_form(self):
-        self._create_user_and_login(self.alice, self.alice)
+        self._create_user_and_login()
         self._make_submissions(add_uuid=True)
         self.assertEqual(self.response.status_code, 201)
 
@@ -69,7 +69,7 @@ class TestCrowdforms(MainTestCase):
         self.assertEqual(self.response.status_code, 405)
 
     def test_user_add_crowdform(self):
-        self._add_crowdform()
+        self._add_crowdform('alice', 'alice')
         self.assertEqual(self.response.status_code, 302)
         meta = MetaData.crowdform_users(self.xform)
         self.assertEqual(len(meta), 1)
@@ -77,11 +77,12 @@ class TestCrowdforms(MainTestCase):
 
     def test_disallow_access_to_closed_crowdform(self):
         self._close_crowdform()
-        self._add_crowdform()
+        self._add_crowdform('alice', 'alice')
         self.assertEqual(self.response.status_code, 403)
 
     def test_user_can_view_added_crowdform(self):
-        self._add_crowdform()
+        self._create_user_and_login('alice', 'alice')
+        self._add_crowdform('alice', 'alice')
         response = self.client.get(reverse(formList,
                                    kwargs={'username': self.alice}))
         self.assertEqual(response.status_code, 200)
@@ -100,8 +101,8 @@ class TestCrowdforms(MainTestCase):
         self._add_crowdform()
         self.response = self.client.get(self.edit_url, {'crowdform': 'delete'})
         meta = MetaData.crowdform_users(self.xform)
-        self.assertEqual(len(meta), 0)
         self.assertEqual(self.response.status_code, 302)
+        self.assertEqual(len(meta), 0)
 
     def test_user_toggle_form_crowd_on(self):
         self.xform.shared = False
@@ -122,11 +123,10 @@ class TestCrowdforms(MainTestCase):
         self.xform.is_crowd_form = True
         self.xform.save()
         response = self.client.post(
-            self.edit_url, {'settings_form': 'active', 'shared': 'on', 'is_crowd_form': 'off'},
+            self.edit_url, {'settings_form': 'active', 'is_crowd_form': 'off'},
             HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)
         xform = XForm.objects.get(pk=self.xform.pk)
-        self.assertEqual(xform.shared, True)
         self.assertEqual(xform.is_crowd_form, False)
 
     def test_crowdform_for_new_user(self):

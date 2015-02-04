@@ -1,8 +1,10 @@
 from django.contrib import admin
 from odk_logger.models import XForm
+from guardian.admin import GuardedModelAdmin
 
 
-class FormAdmin(admin.ModelAdmin):
+
+class FormAdmin(GuardedModelAdmin):
 
     list_display = ('id_string', 'user', 'form_active', 'shared')
 
@@ -12,5 +14,10 @@ class FormAdmin(admin.ModelAdmin):
         if request.user.is_superuser:
             return qs
         return qs.filter(user=request.user)
+
+    list_filter = ('date_modified', 'form_active', 'user',)
+    search_fields = ['user__username', 'title']
+
+
 
 admin.site.register(XForm, FormAdmin)

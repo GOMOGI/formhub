@@ -10,6 +10,7 @@ django-guardian>=1.1.1
 django-oauth-toolkit==0.5.0
 django-registration>=1.0
 djangorestframework==2.3.8
+django-ses==0.7.0
 django-taggit==0.10
 django-templated-email==0.4.1
 dpath==1.2-45
@@ -17,6 +18,7 @@ elaphe==0.5.6
 gdata==2.0.18
 httmock==1.0.7
 httplib2==0.8
+ipdbplugin==1.4.1
 lxml==3.2.4
 Markdown==2.3.1
 mock>=1.0.1
@@ -30,6 +32,7 @@ pymongo==2.6.3
 python-digest==1.7
 pytz>=2013b
 pyxform==0.9.20
+raven==5.1.1
 recaptcha-client==1.0.6
 requests==2.0.1
 South==0.8.2

@@ -396,6 +396,9 @@ def delete_xform(request, username, id_string):
     xform = get_object_or_404(XForm, user__username=username,
                               id_string=id_string)
 
+    if not request.user.has_perm('odk_logger.delete_xform', xform):
+        return HttpResponseForbidden(_('You do not have permission to delete '
+                                        'this form, please see an your admin.'))
     # delete xform and submissions
     remove_xform(xform)
 
@@ -430,18 +433,20 @@ def enter_data(request, username, id_string, test_server=None):
     owner = get_object_or_404(User, username=username)
     xform = get_object_or_404(XForm, user__username=username,
                               id_string=id_string)
-    if not has_edit_permission(xform, owner, request, xform.shared):
-        return HttpResponseForbidden(_(u'Not shared.'))
-    
+    if not (owner == xform.user or
+            request.user.has_perm('odk_logger.edit_xform', xform)):
+        return HttpResponseForbidden(_('You do not have permission to add to '
+                                        'this form, please see an your admin.'))
+
     if test_server:
         form_url = test_server
     else:
         try:
-            formhub_url = "http://%s/" % request.META['HTTP_HOST']
+            formhub_url = request.build_absolute_uri('/')
         except:
             formhub_url = "http://formhub.org/"
-        form_url = formhub_url + username   
-        
+        form_url = formhub_url + username
+
         if hasattr(settings, "TESTING_MODE") and settings.TESTING_MODE:
             form_url = "https://testserver.com/bob"
     try:
@@ -478,6 +483,8 @@ def edit_data(request, username, id_string, data_id):
         XForm, user__username=username, id_string=id_string)
     instance = get_object_or_404(
         Instance, pk=data_id, xform=xform)
+    import pprint
+    pprint.pprint(locals())
     if not has_edit_permission(xform, owner, request, xform.shared):
         return HttpResponseForbidden(_(u'Not shared.'))
     if not hasattr(settings, 'ENKETO_URL'):
@@ -491,7 +498,7 @@ def edit_data(request, username, id_string, data_id):
     url = '%sdata/edit_url' % settings.ENKETO_URL
     # see commit 220f2dad0e for tmp file creation
     try:
-        formhub_url = "http://%s/" % request.META['HTTP_HOST']
+        formhub_url = request.build_absolute_uri('/')
     except:
         formhub_url = "http://formhub.org/"
     injected_xml = inject_instanceid(instance.xml, instance.uuid)
@@ -503,7 +510,7 @@ def edit_data(request, username, id_string, data_id):
                 'id_string': id_string}
         ) + "#/" + str(instance.id))
     form_url = formhub_url + username
-    
+
     if hasattr(settings, "TESTING_MODE") and settings.TESTING_MODE:
         form_url = "https://testserver.com/bob"
 
