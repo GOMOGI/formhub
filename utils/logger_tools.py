@@ -278,6 +278,9 @@ def publish_xls_form(xls_file, user, id_string=None):
         dd, created = DataDictionary.objects.get_or_create(
             user=user, id_string=id_string)
         dd.xls = xls_file
+        # Not sure where else to set the title gracefully
+        # Signals are not showing when the form is "created"
+        dd._set_title()
         dd.save()
         return dd
 
