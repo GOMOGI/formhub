@@ -131,6 +131,7 @@ class XForm(models.Model):
         super(XForm, self).save(*args, **kwargs)
 
     def save(self, *args, **kwargs):
+        #from pudb import set_trace; set_trace()
         old_id_string = self.id_string
         if not old_id_string:
             self._set_id_string()

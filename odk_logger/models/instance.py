@@ -63,6 +63,7 @@ class Instance(models.Model):
         app_label = 'odk_logger'
 
     def _set_xform(self, id_string):
+
         self.xform = XForm.objects.get(
             id_string=id_string, user=self.user)
 
@@ -97,11 +98,12 @@ class Instance(models.Model):
         set_uuid(self)
 
     def save(self, *args, **kwargs):
+        #from pudb import set_trace; set_trace()
         self._set_xform(get_id_string_from_xml_str(self.xml))
         doc = self.get_dict()
         if self.xform and not self.xform.form_active:
             raise FormInactiveError()
-        
+
         self._set_start_time(doc)
         self._set_date(doc)
         self._set_survey_type(doc)

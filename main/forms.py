@@ -273,6 +273,7 @@ class QuickConverter(QuickConverterFile, QuickConverterURL,
     validate = URLValidator()
 
     def publish(self, user, id_string=None):
+        #from pudb import set_trace; set_trace()
         if self.is_valid():
             # If a text (csv) representation of the xlsform is present,
             # this will save the file and pass it instead of the 'xls_file'
@@ -293,9 +294,9 @@ class QuickConverter(QuickConverterFile, QuickConverterURL,
                 cleaned_xls_file = self.cleaned_data['xls_file']
 
 
-                if not id_string:
-                    id_string = cleaned_xls_file.name[:-4] + '_' + ''.join(
-                        random.sample("abcdefghijklmnopqrstuvwxyz0123456789", 6))
+                #if not id_string:
+                #    id_string = cleaned_xls_file.name[:-4] + '_' + ''.join(
+                #        random.sample("abcdefghijklmnopqrstuvwxyz0123456789", 6))
 
 
                 cleaned_xls_file.name = ''.join([ x if x in string.ascii_letters + string.digits + '-.' else '-'
@@ -326,13 +327,12 @@ class QuickConverter(QuickConverterFile, QuickConverterURL,
                 xls_data = ContentFile(urllib2.urlopen(cleaned_url).read())
                 cleaned_xls_file = \
                     default_storage.save(cleaned_xls_file, xls_data)
-                if not id_string:
-                    id_string = cleaned_xls_filename[:-4] + '_' + ''.join(
-                        random.sample("abcdefghijklmnopqrstuvwxyz0123456789", 6))
+                #if not id_string:
+                #    id_string = cleaned_xls_filename[:-4] + '_' + ''.join(
+                #        random.sample("abcdefghijklmnopqrstuvwxyz0123456789", 6))
             # publish the xls
-            allowed_chars = 'abcdefghijklmnopqrstuwvxyz01234567890_-'
-            id_string = ''.join([ x if x in allowed_chars else '-'
-                for x in id_string.lower()])
+            #id_string = ''.join([ x if x in allowed_chars else '-'
+            #    for x in id_string.lower()])
 
             return publish_xls_form(cleaned_xls_file, user, id_string)
 

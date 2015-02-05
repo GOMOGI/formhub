@@ -71,6 +71,7 @@ class TestFormsAPI(TestAPICase):
         self.assertEqual(response.data, self.form_data)
 
     def test_form_format(self):
+        from pudb import set_trace; set_trace()
         self._publish_xls_form_to_project()
         view = XFormViewSet.as_view({
             'get': 'form'
@@ -87,7 +88,7 @@ class TestFormsAPI(TestAPICase):
         self.assertEqual(response.status_code, 200)
         self.assertDictContainsSubset(data, response.data)
         self.assertRegexpMatches(response.data['name'], r'^transportation.*')
-        
+
         tmpName = response.data['name']
 
         response = view(request, owner='bob', pk=formid, format='xml')
