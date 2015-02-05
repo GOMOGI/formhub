@@ -305,7 +305,7 @@ class QuickConverter(QuickConverterFile, QuickConverterURL,
                     cleaned_url = self.cleaned_data['dropbox_xls_url']
                 cleaned_xls_filename = urlparse(cleaned_url)
                 cleaned_xls_filename = \
-                    '_'.join(cleaned_xls_file.path.split('/')[-2:])
+                    '_'.join(cleaned_xls_filename.path.split('/')[-2:])
 
                 if cleaned_xls_filename[-4:] != '.xls':
                     cleaned_xls_filename += '.xls'
