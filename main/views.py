@@ -640,7 +640,7 @@ def edit(request, username, id_string):
                 if compat['type'] == 'alert-error':
                     xform.allows_sms = False
                     xform.sms_id_string = pid
-                xform.save()
+                xform.update()
 
         elif request.FILES.get('media'):
             audit = {

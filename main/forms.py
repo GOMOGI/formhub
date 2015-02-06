@@ -273,7 +273,6 @@ class QuickConverter(QuickConverterFile, QuickConverterURL,
     validate = URLValidator()
 
     def publish(self, user, id_string=None):
-        #from pudb import set_trace; set_trace()
         if self.is_valid():
             # If a text (csv) representation of the xlsform is present,
             # this will save the file and pass it instead of the 'xls_file'
@@ -293,8 +292,8 @@ class QuickConverter(QuickConverterFile, QuickConverterURL,
             else:
                 cleaned_xls_file = self.cleaned_data['xls_file']
 
-                if not id_string:
-                    id_string = slugify('.'.join(cleaned_xls_file.name.split(".")[:-1]))
+                #if not id_string:
+                #    id_string = slugify('.'.join(cleaned_xls_file.name.split(".")[:-1]))
 
                 if cleaned_xls_file and not settings.TESTING_MODE:
                     #We need to save it here so if the file already exists we get the _N filename

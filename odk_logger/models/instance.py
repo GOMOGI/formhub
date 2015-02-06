@@ -1,4 +1,5 @@
 import re
+
 from django.db import models
 from django.db.models.signals import post_save
 from django.db.models.signals import post_delete
@@ -63,9 +64,13 @@ class Instance(models.Model):
         app_label = 'odk_logger'
 
     def _set_xform(self, id_string):
-
-        self.xform = XForm.objects.get(
-            id_string=id_string, user=self.user)
+        try:
+            # Why is this here, in the deepest darkness madness waits.
+            self.xform = XForm.objects.get(
+                id_string=id_string, user=self.user)
+        except:
+            client.captureException()
+            raise
 
     def get_root_node_name(self):
         self._set_parser()
@@ -99,7 +104,9 @@ class Instance(models.Model):
 
     def save(self, *args, **kwargs):
         #from pudb import set_trace; set_trace()
-        self._set_xform(get_id_string_from_xml_str(self.xml))
+        xml = self.xml
+        id_string = get_id_string_from_xml_str(xml)
+        self._set_xform(id_string)
         doc = self.get_dict()
         if self.xform and not self.xform.form_active:
             raise FormInactiveError()
