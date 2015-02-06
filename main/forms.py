@@ -13,7 +13,6 @@ from django.forms import ModelForm
 from django.utils.translation import ugettext as _, ugettext_lazy
 from django.conf import settings
 from recaptcha.client import captcha
-from django.utils.text import slugify
 #from main.models import UserProfile
 from odk_viewer.models.data_dictionary import upload_to
 from registration.forms import RegistrationFormUniqueEmail
@@ -292,9 +291,6 @@ class QuickConverter(QuickConverterFile, QuickConverterURL,
             else:
                 cleaned_xls_file = self.cleaned_data['xls_file']
 
-                #if not id_string:
-                #    id_string = slugify('.'.join(cleaned_xls_file.name.split(".")[:-1]))
-
                 if cleaned_xls_file and not settings.TESTING_MODE:
                     #We need to save it here so if the file already exists we get the _N filename
                     cleaned_xls_file = default_storage.save(\
@@ -319,12 +315,6 @@ class QuickConverter(QuickConverterFile, QuickConverterURL,
                 xls_data = ContentFile(urllib2.urlopen(cleaned_url).read())
                 cleaned_xls_file = \
                     default_storage.save(cleaned_xls_file, xls_data)
-                #if not id_string:
-                #    id_string = cleaned_xls_filename[:-4] + '_' + ''.join(
-                #        random.sample("abcdefghijklmnopqrstuvwxyz0123456789", 6))
-            # publish the xls
-            #id_string = ''.join([ x if x in allowed_chars else '-'
-            #    for x in id_string.lower()])
 
             return publish_xls_form(cleaned_xls_file, user, id_string)
 

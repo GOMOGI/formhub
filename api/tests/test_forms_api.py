@@ -71,7 +71,6 @@ class TestFormsAPI(TestAPICase):
         self.assertEqual(response.data, self.form_data)
 
     def test_form_format(self):
-        from pudb import set_trace; set_trace()
         self._publish_xls_form_to_project()
         view = XFormViewSet.as_view({
             'get': 'form'
