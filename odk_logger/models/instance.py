@@ -69,6 +69,7 @@ class Instance(models.Model):
             self.xform = XForm.objects.get(
                 id_string=id_string, user=self.user)
         except:
+            from raven.contrib.django.raven_compat.models import client
             client.captureException()
             raise
 
