@@ -395,7 +395,7 @@ def export_list(request, username, id_string, export_type):
     if not has_permission(xform, owner, request):
         return HttpResponseForbidden(_(u'Not shared.'))
 
-    can_edit =  request.user.has_perm('odk_logger.change_xform', xform)
+    can_edit = request.user.has_perm('odk_logger.change_xform')
     if not can_edit:
         return HttpResponseForbidden(_(u'You do not have permission to export '
                                         'this form'))

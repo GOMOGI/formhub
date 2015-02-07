@@ -131,7 +131,7 @@ class XForm(models.Model):
         super(XForm, self).save(*args, **kwargs)
 
     def save(self, *args, **kwargs):
-        #from pudb import set_trace; set_trace()
+        self._set_title()
         old_id_string = self.id_string
         if not old_id_string:
             self._set_id_string()
@@ -159,7 +159,6 @@ class XForm(models.Model):
         original_pk = self.pk
         super(XForm, self).save(*args, **kwargs)
         if self.pk != original_pk:
-            self._set_title()
             print "Setting perms for ", self.pk
             for perm in get_perms_for_model(XForm):
                 assign_perm(perm.codename, self.user, self)

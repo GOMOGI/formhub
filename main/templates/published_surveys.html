@@ -75,21 +75,16 @@
         </td>
         <td>
             {% if  not xform.encrypted and submission_count %}
-              {% get_obj_perms user for xform as "form_perms" %}
-              {% if "change_xform" in form_perms %}
-                <a href="{% url "odk_viewer.views.export_list"  xform.user.username xform.id_string 'csv' %}" class="download"><i class="icon-file-alt"></i> csv</a>
-                <a href="{% url "odk_viewer.views.export_list"  xform.user.username xform.id_string 'xls' %}" class="download"><i class="icon-table"></i> xls</a>
-                {% if has_surveys_with_geopoints %}
-                    <a href="{% url "odk_viewer.views.kml_export"  xform.user.username xform.id_string %}" class="download"><i class="icon-globe"></i> kml</a>
-                {% endif %}
-                {% if xform.shared_data %}
-                    <span class="label label-info label-public">{%  trans "PUBLIC" %}</span>
-                {% endif %}
-                {% if xform.encrypted %}
-                    <span class="label label-important icon-lock label-encrypted">&nbsp;&nbsp;{%  trans "ENCRYPTED" %}</span>
-                {% endif %}
-              {% else %}
-                {% trans 'Downloads unavailable' %}
+              <a href="{% url "odk_viewer.views.export_list"  xform.user.username xform.id_string 'csv' %}" class="download"><i class="icon-file-alt"></i> csv</a>
+              <a href="{% url "odk_viewer.views.export_list"  xform.user.username xform.id_string 'xls' %}" class="download"><i class="icon-table"></i> xls</a>
+              {% if has_surveys_with_geopoints %}
+                  <a href="{% url "odk_viewer.views.kml_export"  xform.user.username xform.id_string %}" class="download"><i class="icon-globe"></i> kml</a>
+              {% endif %}
+              {% if xform.shared_data %}
+                  <span class="label label-info label-public">{%  trans "PUBLIC" %}</span>
+              {% endif %}
+              {% if xform.encrypted %}
+                  <span class="label label-important icon-lock label-encrypted">&nbsp;&nbsp;{%  trans "ENCRYPTED" %}</span>
               {% endif %}
             {% endif %}
         </td>
