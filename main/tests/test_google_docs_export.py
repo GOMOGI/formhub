@@ -6,6 +6,7 @@ from main.google_export import refresh_access_token
 from odk_viewer.views import google_xls_export
 
 from test_base import MainTestCase
+from unittest.case import skip
 
 class TestGoogleDocsExport(MainTestCase):
 
@@ -20,6 +21,7 @@ class TestGoogleDocsExport(MainTestCase):
         
         
 
+    @skip("The Doclist API has been shut down.")
     def test_google_docs_export(self):
         self._publish_transportation_form()
         self._make_submissions()
