@@ -1,0 +1,13 @@
+python-pip
+postgresql
+postgresql-server-dev-9.3
+default-jre
+gcc
+python-dev
+libjpeg-dev
+libfreetype6-dev
+zlib1g-dev
+rabbitmq-server
+build-essential
+libxslt1-dev
+mongodb
