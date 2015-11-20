@@ -35,7 +35,7 @@ pyxform==0.9.20
 raven==5.1.1
 recaptcha-client==1.0.6
 requests==2.0.1
-South==0.8.2
+South==1.0.2
 unicodecsv==0.9.4
 xlrd==0.9.2
 xlwt==0.7.5
