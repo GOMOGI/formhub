@@ -3,6 +3,7 @@
 export DJANGO_SETTINGS_MODULE=formhub.preset.ehealth_docker
 
 sudo service mongodb start
+sleep 10
 sudo service postgresql start
 
 sudo -H -u postgres bash -c "createdb formhubdjangodb"
